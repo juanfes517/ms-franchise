@@ -7,4 +7,5 @@ public interface IProductPersistencePort {
 
     Mono<Product> save(Product product);
     Mono<Product> delete(String productId, String branchId);
+    Mono<Product> updateProduct(Product product);
 }
