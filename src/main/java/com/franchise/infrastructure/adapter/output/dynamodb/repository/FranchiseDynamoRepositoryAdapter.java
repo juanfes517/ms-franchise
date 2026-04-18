@@ -35,6 +35,10 @@ public class FranchiseDynamoRepositoryAdapter implements IFranchisePersistencePo
 
     @Override
     public Mono<Franchise> findById(String id) {
+        if (!id.startsWith(DynamoAdapterConstants.PREFIX_FRANCHISE)) {
+            return Mono.error(new IllegalArgumentException(DynamoAdapterConstants.INVALID_FRANCHISE_ID));
+        }
+
         Key key = Key.builder()
                 .partitionValue(id)
                 .sortValue(id)

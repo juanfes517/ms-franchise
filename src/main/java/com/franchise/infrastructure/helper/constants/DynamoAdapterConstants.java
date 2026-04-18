@@ -8,4 +8,7 @@ public class DynamoAdapterConstants {
     public static final String PREFIX_BRANCH = "BRANCH#";
     public static final String PREFIX_PRODUCT = "PRODUCT#";
     public static final String DYNAMODB_TABLE_NAME = "franchise-system";
+
+    public static final String INVALID_FRANCHISE_ID = "Franchise ID must start with 'FRANCHISE'";
+
 }
