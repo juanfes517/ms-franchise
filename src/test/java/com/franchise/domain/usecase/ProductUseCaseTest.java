@@ -51,4 +51,28 @@ class ProductUseCaseTest {
                 })
                 .verifyComplete();
     }
+
+    @Test
+    void shouldDeleteProductSuccessfully() {
+
+        String productId = "PRODUCT#123";
+        String branchId = "BRANCH#123";
+
+        Product productOutput = Product.builder()
+                .id("PRODUCT#123")
+                .name("test product name")
+                .stock(5)
+                .branchId("BRANCH#123")
+                .build();
+
+        when(productPersistencePort.delete(any(String.class), any(String.class)))
+                .thenReturn(Mono.just(productOutput));
+
+        StepVerifier.create(productUseCase.deleteProductFromBranch(productId, branchId))
+                .assertNext(product -> {
+                    assertEquals(productId, product.getId());
+                    assertEquals(branchId, product.getBranchId());
+                })
+                .verifyComplete();
+    }
 }
