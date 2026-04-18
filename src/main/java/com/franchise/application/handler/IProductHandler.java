@@ -7,4 +7,5 @@ import reactor.core.publisher.Mono;
 public interface IProductHandler {
 
     Mono<ProductResponseDTO> addProductToBranch(CreateProductDTO createProductDTO);
+    Mono<ProductResponseDTO> deleteProductFromBranch(String productId, String branchId);
 }

@@ -11,5 +11,6 @@ public class DynamoAdapterConstants {
 
     public static final String INVALID_FRANCHISE_ID = "Franchise ID must start with 'FRANCHISE'";
     public static final String INVALID_BRANCH_ID = "Branch ID must start with 'BRANCH'";
+    public static final String INVALID_PRODUCT_ID = "Product ID must start with 'PRODUCT'";
 
 }

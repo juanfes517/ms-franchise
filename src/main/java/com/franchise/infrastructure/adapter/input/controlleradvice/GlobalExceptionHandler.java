@@ -3,6 +3,7 @@ package com.franchise.infrastructure.adapter.input.controlleradvice;
 import com.franchise.application.dto.response.ExceptionResponseDTO;
 import com.franchise.application.helper.exception.BranchNotFoundException;
 import com.franchise.application.helper.exception.FranchiseNotFoundException;
+import com.franchise.application.helper.exception.ProductNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -27,6 +28,20 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BranchNotFoundException.class)
     public ResponseEntity<ExceptionResponseDTO> handlerBranchNotFoundException(BranchNotFoundException e) {
+        ExceptionResponseDTO exceptionResponse = ExceptionResponseDTO.builder()
+                .status(HttpStatus.NOT_FOUND.value())
+                .code(e.getErrorCode())
+                .message(e.getMessage())
+                .details(e.getDetails())
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(exceptionResponse);
+    }
+
+    @ExceptionHandler(ProductNotFoundException.class)
+    public ResponseEntity<ExceptionResponseDTO> handlerProductNotFoundException(ProductNotFoundException e) {
         ExceptionResponseDTO exceptionResponse = ExceptionResponseDTO.builder()
                 .status(HttpStatus.NOT_FOUND.value())
                 .code(e.getErrorCode())

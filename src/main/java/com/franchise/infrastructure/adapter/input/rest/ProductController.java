@@ -7,10 +7,7 @@ import com.franchise.infrastructure.helper.constants.ApiConstants;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -23,6 +20,15 @@ public class ProductController {
     @PostMapping
     public Mono<ResponseEntity<ProductResponseDTO>> addProduct(@Valid @RequestBody CreateProductDTO productDTO) {
         return productHandler.addProductToBranch(productDTO)
+                .map(product -> ResponseEntity
+                        .ok()
+                        .body(product));
+    }
+
+    @DeleteMapping
+    public Mono<ResponseEntity<ProductResponseDTO>> deleteProduct(
+            @RequestParam String productId, @RequestParam String branchId) {
+        return productHandler.deleteProductFromBranch(productId, branchId)
                 .map(product -> ResponseEntity
                         .ok()
                         .body(product));

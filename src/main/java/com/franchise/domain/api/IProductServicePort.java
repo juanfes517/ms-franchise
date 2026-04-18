@@ -6,4 +6,5 @@ import reactor.core.publisher.Mono;
 public interface IProductServicePort {
 
     Mono<Product> addProductToBranch(Product product);
+    Mono<Product> deleteProductFromBranch(String productId, String branchId);
 }

@@ -2,6 +2,7 @@ package com.franchise.application.handler.impl;
 
 import com.franchise.application.dto.request.CreateProductDTO;
 import com.franchise.application.helper.exception.BranchNotFoundException;
+import com.franchise.application.helper.exception.ProductNotFoundException;
 import com.franchise.domain.api.IBranchServicePort;
 import com.franchise.domain.api.IProductServicePort;
 import com.franchise.domain.model.Branch;
@@ -77,6 +78,48 @@ class ProductHandlerTest {
                 .expectErrorMatches(error ->
                         error instanceof BranchNotFoundException &&
                         error.getMessage().equals("Branch not found")
+                )
+                .verify();
+    }
+
+    @Test
+    void shouldDeleteProductSuccessfully() {
+
+        String productId = "PRODUCT#123";
+        String branchId = "BRANCH#123";
+
+        Product productOutput = Product.builder()
+                .id("PRODUCT#123")
+                .branchId("BRANCH#123")
+                .name("test product name")
+                .stock(3)
+                .build();
+
+        when(productServicePort.deleteProductFromBranch(any(String.class), any(String.class)))
+                .thenReturn(Mono.just(productOutput));
+
+        StepVerifier.create(productHandler.deleteProductFromBranch(productId, branchId))
+                .assertNext(product -> {
+                    assertEquals(productId, product.getId());
+                    assertEquals(branchId, product.getBranchId());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturnErrorWhenProductNotFound() {
+
+        String productId = "PRODUCT#123";
+        String branchId = "BRANCH#123";
+
+
+        when(productServicePort.deleteProductFromBranch(any(String.class), any(String.class)))
+                .thenReturn(Mono.empty());
+
+        StepVerifier.create(productHandler.deleteProductFromBranch(productId, branchId))
+                .expectErrorMatches(error ->
+                        error instanceof ProductNotFoundException &&
+                        error.getMessage().equals("Product not found")
                 )
                 .verify();
     }
