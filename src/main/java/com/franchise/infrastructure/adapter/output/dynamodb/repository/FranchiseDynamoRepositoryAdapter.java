@@ -28,6 +28,7 @@ public class FranchiseDynamoRepositoryAdapter implements IFranchisePersistencePo
     @Override
     public Mono<Franchise> save(Franchise franchise) {
         FranchiseEntity franchiseEntity = FranchiseMapper.toFranchiseEntity(franchise);
-        return Mono.fromFuture(table.putItem(franchiseEntity)).thenReturn(franchise);
+        return Mono.fromFuture(table.putItem(franchiseEntity))
+                .thenReturn(FranchiseMapper.toDomain(franchiseEntity));
     }
 }

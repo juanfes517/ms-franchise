@@ -11,8 +11,15 @@ public class FranchiseMapper {
     public static FranchiseEntity toFranchiseEntity(Franchise franchise) {
         return FranchiseEntity.builder()
                 .partitionKey(DynamoAdapterConstants.PREFIX_FRANCHISE + franchise.getId())
-                .sortKey(franchise.getId())
+                .sortKey(DynamoAdapterConstants.PREFIX_FRANCHISE + franchise.getId())
                 .name(franchise.getName())
+                .build();
+    }
+
+    public static Franchise toDomain(FranchiseEntity franchiseEntity) {
+        return Franchise.builder()
+                .id(franchiseEntity.getPartitionKey())
+                .name(franchiseEntity.getName())
                 .build();
     }
 }
