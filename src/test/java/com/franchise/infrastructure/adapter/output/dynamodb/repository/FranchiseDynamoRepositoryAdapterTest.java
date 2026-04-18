@@ -1,6 +1,5 @@
 package com.franchise.infrastructure.adapter.output.dynamodb.repository;
 
-import com.franchise.application.helper.exception.FranchiseNotFoundException;
 import com.franchise.domain.model.Franchise;
 import com.franchise.infrastructure.adapter.output.dynamodb.entity.FranchiseEntity;
 import org.junit.jupiter.api.BeforeEach;

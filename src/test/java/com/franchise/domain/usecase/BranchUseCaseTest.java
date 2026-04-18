@@ -1,7 +1,6 @@
 package com.franchise.domain.usecase;
 
 import com.franchise.domain.model.Branch;
-import com.franchise.domain.model.Franchise;
 import com.franchise.domain.spi.IBranchPersistencePort;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
