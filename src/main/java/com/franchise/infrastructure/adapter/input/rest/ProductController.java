@@ -1,6 +1,7 @@
 package com.franchise.infrastructure.adapter.input.rest;
 
 import com.franchise.application.dto.request.CreateProductDTO;
+import com.franchise.application.dto.request.ProductRequestDTO;
 import com.franchise.application.dto.response.ProductResponseDTO;
 import com.franchise.application.handler.IProductHandler;
 import com.franchise.infrastructure.helper.constants.ApiConstants;
@@ -29,6 +30,14 @@ public class ProductController {
     public Mono<ResponseEntity<ProductResponseDTO>> deleteProduct(
             @RequestParam String productId, @RequestParam String branchId) {
         return productHandler.deleteProductFromBranch(productId, branchId)
+                .map(product -> ResponseEntity
+                        .ok()
+                        .body(product));
+    }
+
+    @PatchMapping
+    public Mono<ResponseEntity<ProductResponseDTO>> updateProduct(@Valid @RequestBody ProductRequestDTO productDTO) {
+        return productHandler.updateProduct(productDTO)
                 .map(product -> ResponseEntity
                         .ok()
                         .body(product));
