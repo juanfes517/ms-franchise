@@ -9,7 +9,7 @@ import lombok.*;
 @Builder
 public class Product {
 
-    private Long id;
+    private String id;
     private String name;
     private int stock;
     private Long branchId;
