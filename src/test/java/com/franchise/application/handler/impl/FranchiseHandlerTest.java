@@ -1,10 +1,8 @@
 package com.franchise.application.handler.impl;
 
 import com.franchise.application.dto.request.CreateFranchiseDTO;
-import com.franchise.application.dto.response.FranchiseWithoutBranchDTO;
 import com.franchise.domain.api.IFranchiseServicePort;
 import com.franchise.domain.model.Franchise;
-import com.franchise.domain.usecase.FranchiseUseCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

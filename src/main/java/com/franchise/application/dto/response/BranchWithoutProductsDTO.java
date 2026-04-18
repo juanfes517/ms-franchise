@@ -1,13 +1,13 @@
-package com.franchise.domain.model;
+package com.franchise.application.dto.response;
 
 import lombok.*;
 
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Setter
 @Getter
 @Builder
-public class Branch {
+public class BranchWithoutProductsDTO {
 
     private String id;
     private String name;

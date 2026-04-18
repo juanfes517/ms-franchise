@@ -3,7 +3,7 @@ package com.franchise.infrastructure.adapter.input.rest;
 import com.franchise.application.dto.request.CreateFranchiseDTO;
 import com.franchise.application.dto.response.FranchiseWithoutBranchDTO;
 import com.franchise.application.handler.IFranchiseHandler;
-import com.franchise.infrastructure.helper.constants.ApiContants;
+import com.franchise.infrastructure.helper.constants.ApiConstants;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping(ApiContants.FRANCHISE_API_PATH)
+@RequestMapping(ApiConstants.FRANCHISE_API_PATH)
 @RequiredArgsConstructor
 public class FranchiseController {
 

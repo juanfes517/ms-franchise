@@ -9,9 +9,11 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 
 import java.util.concurrent.CompletableFuture;
@@ -55,6 +57,27 @@ class FranchiseDynamoRepositoryAdapterTest {
                 .assertNext(savedFranchise -> {
                     assertEquals("FRANCHISE#123", savedFranchise.getId());
                     assertEquals("test franchise name", savedFranchise.getName());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldFindFranchiseSuccessfully() {
+        String id = "FRANCHISE#123";
+
+        Mono<FranchiseEntity> dynamoResponse = Mono.just(FranchiseEntity.builder()
+                .partitionKey("FRANCHISE#123")
+                .sortKey("FRANCHISE#123")
+                .name("test franchise name")
+                .build());
+
+        when(table.getItem(any(Key.class)))
+                .thenReturn(dynamoResponse.toFuture());
+
+        StepVerifier.create(adapter.findById(id))
+                .assertNext(franchise -> {
+                    assertEquals("FRANCHISE#123", franchise.getId());
+                    assertEquals("test franchise name", franchise.getName());
                 })
                 .verifyComplete();
     }
