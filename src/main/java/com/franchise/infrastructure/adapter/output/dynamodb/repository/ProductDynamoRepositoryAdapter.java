@@ -11,7 +11,10 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
+import software.amazon.awssdk.enhanced.dynamodb.Expression;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedRequest;
+import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
 
 @Repository
 @RequiredArgsConstructor
@@ -27,7 +30,7 @@ public class ProductDynamoRepositoryAdapter implements IProductPersistencePort {
 
     @Override
     public Mono<Product> save(Product product) {
-        ProductEntity productEntity = ProductMapper.toProductEntity(product);
+        ProductEntity productEntity = ProductMapper.toNewProductEntity(product);
         return Mono.fromFuture(table.putItem(productEntity))
                 .thenReturn(ProductMapper.toDomain(productEntity));
     }
@@ -43,6 +46,29 @@ public class ProductDynamoRepositoryAdapter implements IProductPersistencePort {
                                 )
                         ))))
                 .map(ProductMapper::toDomain);
+    }
+
+    @Override
+    public Mono<Product> updateProduct(Product product) {
+        return this.validateKeys(product.getId(), product.getBranchId())
+                .then(Mono.defer(() -> {
+                    UpdateItemEnhancedRequest<ProductEntity> request = this.buildUpdateItemEnhancedRequest(product);
+                    return Mono.fromFuture(table.updateItem(request));
+                }))
+                .onErrorResume(ConditionalCheckFailedException.class, error -> Mono.empty())
+                .map(ProductMapper::toDomain);
+    }
+
+    private UpdateItemEnhancedRequest<ProductEntity> buildUpdateItemEnhancedRequest(Product product) {
+        ProductEntity productEntity = ProductMapper.toProductEntity(product);
+        return UpdateItemEnhancedRequest
+                .builder(ProductEntity.class)
+                .item(productEntity)
+                .ignoreNulls(true)
+                .conditionExpression(Expression.builder()
+                        .expression(DynamoAdapterConstants.ATTRIBUTE_EXISTS_PARTITION_KEY)
+                        .build())
+                .build();
     }
 
     private Mono<Void> validateKeys(String productId, String branchId) {

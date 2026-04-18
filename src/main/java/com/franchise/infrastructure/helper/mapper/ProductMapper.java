@@ -10,9 +10,18 @@ public class ProductMapper {
 
     private ProductMapper() {}
 
-    public static ProductEntity toProductEntity(Product product) {
+    public static ProductEntity toNewProductEntity(Product product) {
         return ProductEntity.builder()
                 .partitionKey(DynamoAdapterConstants.PREFIX_PRODUCT + UUID.randomUUID())
+                .sortKey(product.getBranchId())
+                .name(product.getName())
+                .stock(product.getStock())
+                .build();
+    }
+
+    public static ProductEntity toProductEntity(Product product) {
+        return ProductEntity.builder()
+                .partitionKey(product.getId())
                 .sortKey(product.getBranchId())
                 .name(product.getName())
                 .stock(product.getStock())
