@@ -10,5 +10,6 @@ public class DynamoAdapterConstants {
     public static final String DYNAMODB_TABLE_NAME = "franchise-system";
 
     public static final String INVALID_FRANCHISE_ID = "Franchise ID must start with 'FRANCHISE'";
+    public static final String INVALID_BRANCH_ID = "Branch ID must start with 'BRANCH'";
 
 }

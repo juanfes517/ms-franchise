@@ -15,4 +15,9 @@ public class BranchUseCase implements IBranchServicePort {
     public Mono<Branch> addBranchToFranchise(Branch branch) {
         return branchPersistencePort.save(branch);
     }
+
+    @Override
+    public Mono<Branch> findBranchById(String id) {
+        return branchPersistencePort.findById(id);
+    }
 }
