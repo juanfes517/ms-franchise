@@ -46,7 +46,6 @@ class FranchiseDynamoRepositoryAdapterTest {
     @Test
     void shouldSaveFranchiseSuccessfully() {
         Franchise franchise = Franchise.builder()
-                .id("123")
                 .name("test franchise name")
                 .build();
 
@@ -55,7 +54,7 @@ class FranchiseDynamoRepositoryAdapterTest {
 
         StepVerifier.create(adapter.save(franchise))
                 .assertNext(savedFranchise -> {
-                    assertEquals("FRANCHISE#123", savedFranchise.getId());
+                    assertTrue(savedFranchise.getId().startsWith("FRANCHISE#"));
                     assertEquals("test franchise name", savedFranchise.getName());
                 })
                 .verifyComplete();
@@ -80,5 +79,16 @@ class FranchiseDynamoRepositoryAdapterTest {
                     assertEquals("test franchise name", franchise.getName());
                 })
                 .verifyComplete();
+    }
+
+    @Test
+    void shouldReturnErrorWhenInvalidFranchiseId() {
+        String id = "InvalidFranchiseId";
+
+        StepVerifier.create(adapter.findById(id))
+                .expectErrorMatches(error ->
+                        error instanceof IllegalArgumentException &&
+                        error.getMessage().equals("Franchise ID must start with 'FRANCHISE'"))
+                .verify();
     }
 }

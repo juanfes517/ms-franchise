@@ -48,4 +48,27 @@ class BranchUseCaseTest {
                 })
                 .verifyComplete();
     }
+
+    @Test
+    void shouldFindFranchiseSuccessfully() {
+
+        String id = "BRANCH#123";
+
+        Branch branchOutput = Branch.builder()
+                .id("BRANCH#123")
+                .franchiseId("FRANCHISE#123")
+                .name("test branch name")
+                .build();
+
+        when(branchPersistencePort.findById(any(String.class)))
+                .thenReturn(Mono.just(branchOutput));
+
+        StepVerifier.create(branchUseCase.findBranchById(id))
+                .assertNext(branch -> {
+                    assertEquals("BRANCH#123", branch.getId());
+                    assertEquals("FRANCHISE#123", branch.getFranchiseId());
+                    assertEquals("test branch name", branch.getName());
+                })
+                .verifyComplete();
+    }
 }

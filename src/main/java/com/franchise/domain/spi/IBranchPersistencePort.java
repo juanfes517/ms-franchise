@@ -6,4 +6,5 @@ import reactor.core.publisher.Mono;
 public interface IBranchPersistencePort {
 
     Mono<Branch> save(Branch branch);
+    Mono<Branch> findById(String id);
 }

@@ -6,8 +6,6 @@ import com.franchise.domain.spi.IBranchPersistencePort;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
-import java.util.UUID;
-
 @RequiredArgsConstructor
 public class BranchUseCase implements IBranchServicePort {
 
@@ -15,7 +13,11 @@ public class BranchUseCase implements IBranchServicePort {
 
     @Override
     public Mono<Branch> addBranchToFranchise(Branch branch) {
-        branch.setId(UUID.randomUUID().toString());
         return branchPersistencePort.save(branch);
+    }
+
+    @Override
+    public Mono<Branch> findBranchById(String id) {
+        return branchPersistencePort.findById(id);
     }
 }

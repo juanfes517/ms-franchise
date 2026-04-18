@@ -6,8 +6,6 @@ import com.franchise.domain.spi.IFranchisePersistencePort;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
-import java.util.UUID;
-
 @RequiredArgsConstructor
 public class FranchiseUseCase implements IFranchiseServicePort {
 
@@ -15,7 +13,6 @@ public class FranchiseUseCase implements IFranchiseServicePort {
 
     @Override
     public Mono<Franchise> createFranchise(Franchise franchise) {
-        franchise.setId(UUID.randomUUID().toString());
         return franchisePersistencePort.save(franchise);
     }
 

@@ -1,6 +1,7 @@
 package com.franchise.infrastructure.adapter.input.controlleradvice;
 
 import com.franchise.application.dto.response.ExceptionResponseDTO;
+import com.franchise.application.helper.exception.BranchNotFoundException;
 import com.franchise.application.helper.exception.FranchiseNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,32 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
+                .body(exceptionResponse);
+    }
+
+    @ExceptionHandler(BranchNotFoundException.class)
+    public ResponseEntity<ExceptionResponseDTO> handlerBranchNotFoundException(BranchNotFoundException e) {
+        ExceptionResponseDTO exceptionResponse = ExceptionResponseDTO.builder()
+                .status(HttpStatus.NOT_FOUND.value())
+                .code(e.getErrorCode())
+                .message(e.getMessage())
+                .details(e.getDetails())
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(exceptionResponse);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ExceptionResponseDTO> handlerIllegalArgumentException(IllegalArgumentException e) {
+        ExceptionResponseDTO exceptionResponse = ExceptionResponseDTO.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message(e.getMessage())
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
                 .body(exceptionResponse);
     }
 }
