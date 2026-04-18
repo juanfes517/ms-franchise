@@ -1,6 +1,6 @@
 package com.franchise.application.dto.request;
 
-import com.franchise.application.helper.DtoConstants;
+import com.franchise.application.helper.constants.DtoConstants;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 

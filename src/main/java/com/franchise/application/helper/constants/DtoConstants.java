@@ -1,4 +1,4 @@
-package com.franchise.application.helper;
+package com.franchise.application.helper.constants;
 
 public class DtoConstants {
 

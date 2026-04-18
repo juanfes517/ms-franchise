@@ -9,5 +9,6 @@ import lombok.*;
 @Builder
 public class FranchiseWithoutBranchDTO {
 
+    private Long id;
     private String name;
 }
