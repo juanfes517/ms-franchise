@@ -46,5 +46,26 @@ class FranchiseUseCaseTest {
                 .verifyComplete();
     }
 
+    @Test
+    void shouldFindFranchiseSuccessfully() {
+
+        String id = "FRANCHISE#343dser12";
+
+        Franchise franchiseOutput = Franchise.builder()
+                .id("FRANCHISE#343dser12")
+                .name("test franchise name")
+                .build();
+
+        when(franchisePersistencePort.findById(any(String.class)))
+                .thenReturn(Mono.just(franchiseOutput));
+
+        StepVerifier.create(franchiseUseCase.findFranchiseById(id))
+                .assertNext(franchise -> {
+                    assertEquals("FRANCHISE#343dser12", franchise.getId());
+                    assertEquals("test franchise name", franchise.getName());
+                })
+                .verifyComplete();
+    }
+
 
 }
