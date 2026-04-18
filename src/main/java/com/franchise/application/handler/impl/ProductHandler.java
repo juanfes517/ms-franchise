@@ -4,6 +4,7 @@ import com.franchise.application.dto.request.CreateProductDTO;
 import com.franchise.application.dto.response.ProductResponseDTO;
 import com.franchise.application.handler.IProductHandler;
 import com.franchise.application.helper.exception.BranchNotFoundException;
+import com.franchise.application.helper.exception.ProductNotFoundException;
 import com.franchise.application.helper.mapper.ProductMapper;
 import com.franchise.domain.api.IBranchServicePort;
 import com.franchise.domain.api.IProductServicePort;
@@ -28,6 +29,14 @@ public class ProductHandler implements IProductHandler {
                     Product product = ProductMapper.toDomain(createProductDTO);
                     return productServicePort.addProductToBranch(product);
                 })
+                .map(ProductMapper::toDTO);
+    }
+
+    @Override
+    public Mono<ProductResponseDTO> deleteProductFromBranch(String productId, String branchId) {
+        return productServicePort
+                .deleteProductFromBranch(productId, branchId)
+                .switchIfEmpty(Mono.error(new ProductNotFoundException(productId, branchId)))
                 .map(ProductMapper::toDTO);
     }
 }
