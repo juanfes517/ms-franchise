@@ -12,8 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import java.util.Map;
-
 @Service
 @RequiredArgsConstructor
 public class BranchHandler implements IBranchHandler {
@@ -24,7 +22,8 @@ public class BranchHandler implements IBranchHandler {
     @Override
     public Mono<BranchWithoutProductsDTO> addBranchToFranchise(CreateBranchDTO createBranchDTO) {
 
-        return franchiseServicePort.findFranchiseById(createBranchDTO.getFranchiseId())
+        return franchiseServicePort
+                .findFranchiseById(createBranchDTO.getFranchiseId())
                 .switchIfEmpty(Mono.error(new FranchiseNotFoundException(createBranchDTO.getFranchiseId())))
                 .flatMap(franchise -> {
                     Branch branch = BranchMapper.toDomain(createBranchDTO);

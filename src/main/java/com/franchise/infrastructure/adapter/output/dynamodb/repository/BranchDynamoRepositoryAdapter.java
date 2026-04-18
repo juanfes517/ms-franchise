@@ -3,7 +3,6 @@ package com.franchise.infrastructure.adapter.output.dynamodb.repository;
 import com.franchise.domain.model.Branch;
 import com.franchise.domain.spi.IBranchPersistencePort;
 import com.franchise.infrastructure.adapter.output.dynamodb.entity.BranchEntity;
-import com.franchise.infrastructure.adapter.output.dynamodb.entity.FranchiseEntity;
 import com.franchise.infrastructure.helper.constants.DynamoAdapterConstants;
 import com.franchise.infrastructure.helper.mapper.BranchMapper;
 import jakarta.annotation.PostConstruct;

@@ -21,7 +21,7 @@ public class BranchController {
     private final IBranchHandler branchHandler;
 
     @PostMapping
-    private Mono<ResponseEntity<BranchWithoutProductsDTO>> addBranchToFranchise(
+    public Mono<ResponseEntity<BranchWithoutProductsDTO>> addBranchToFranchise(
             @Valid @RequestBody CreateBranchDTO createBranchDTO) {
         return branchHandler.addBranchToFranchise(createBranchDTO)
                 .map(branch -> ResponseEntity
