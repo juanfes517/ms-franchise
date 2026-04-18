@@ -31,4 +31,29 @@ public class ProductDynamoRepositoryAdapter implements IProductPersistencePort {
         return Mono.fromFuture(table.putItem(productEntity))
                 .thenReturn(ProductMapper.toDomain(productEntity));
     }
+
+    @Override
+    public Mono<Product> delete(String productId, String branchId) {
+        return this.validateKeys(productId, branchId)
+                .then(Mono.defer(() ->
+                        Mono.fromFuture(table.deleteItem(r -> r
+                                .key(key -> key
+                                        .partitionValue(productId)
+                                        .sortValue(branchId)
+                                )
+                        ))))
+                .map(ProductMapper::toDomain);
+    }
+
+    private Mono<Void> validateKeys(String productId, String branchId) {
+        if (!productId.startsWith(DynamoAdapterConstants.PREFIX_PRODUCT)) {
+            return Mono.error(new IllegalArgumentException(DynamoAdapterConstants.INVALID_PRODUCT_ID));
+        }
+        if (!branchId.startsWith(DynamoAdapterConstants.PREFIX_BRANCH)) {
+            return Mono.error(new IllegalArgumentException(DynamoAdapterConstants.INVALID_BRANCH_ID));
+        }
+
+        return Mono.empty();
+    }
+
 }

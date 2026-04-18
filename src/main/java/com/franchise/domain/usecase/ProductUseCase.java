@@ -15,4 +15,9 @@ public class ProductUseCase implements IProductServicePort {
     public Mono<Product> addProductToBranch(Product product) {
         return productPersistencePort.save(product);
     }
+
+    @Override
+    public Mono<Product> deleteProductFromBranch(String productId, String branchId) {
+        return productPersistencePort.delete(productId, branchId);
+    }
 }

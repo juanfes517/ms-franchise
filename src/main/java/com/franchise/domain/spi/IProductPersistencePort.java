@@ -6,4 +6,5 @@ import reactor.core.publisher.Mono;
 public interface IProductPersistencePort {
 
     Mono<Product> save(Product product);
+    Mono<Product> delete(String productId, String branchId);
 }
