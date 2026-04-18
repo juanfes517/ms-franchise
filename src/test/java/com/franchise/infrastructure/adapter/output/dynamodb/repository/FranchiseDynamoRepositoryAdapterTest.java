@@ -1,5 +1,6 @@
 package com.franchise.infrastructure.adapter.output.dynamodb.repository;
 
+import com.franchise.application.helper.exception.FranchiseNotFoundException;
 import com.franchise.domain.model.Franchise;
 import com.franchise.infrastructure.adapter.output.dynamodb.entity.FranchiseEntity;
 import org.junit.jupiter.api.BeforeEach;
@@ -79,5 +80,16 @@ class FranchiseDynamoRepositoryAdapterTest {
                     assertEquals("test franchise name", franchise.getName());
                 })
                 .verifyComplete();
+    }
+
+    @Test
+    void shouldReturnErrorWhenInvalidFranchiseId() {
+        String id = "InvalidFranchiseId";
+
+        StepVerifier.create(adapter.findById(id))
+                .expectErrorMatches(error ->
+                        error instanceof IllegalArgumentException &&
+                        error.getMessage().equals("Franchise ID must start with 'FRANCHISE'"))
+                .verify();
     }
 }
