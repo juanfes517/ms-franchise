@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 
 @Repository
@@ -30,5 +31,16 @@ public class FranchiseDynamoRepositoryAdapter implements IFranchisePersistencePo
         FranchiseEntity franchiseEntity = FranchiseMapper.toFranchiseEntity(franchise);
         return Mono.fromFuture(table.putItem(franchiseEntity))
                 .thenReturn(FranchiseMapper.toDomain(franchiseEntity));
+    }
+
+    @Override
+    public Mono<Franchise> findById(String id) {
+        Key key = Key.builder()
+                .partitionValue(id)
+                .sortValue(id)
+                .build();
+
+        return Mono.fromFuture(table.getItem(key))
+                .map(FranchiseMapper::toDomain);
     }
 }

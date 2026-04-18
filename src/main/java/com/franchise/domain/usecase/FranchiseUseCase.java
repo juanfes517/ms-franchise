@@ -18,4 +18,9 @@ public class FranchiseUseCase implements IFranchiseServicePort {
         franchise.setId(UUID.randomUUID().toString());
         return franchisePersistencePort.save(franchise);
     }
+
+    @Override
+    public Mono<Franchise> findFranchiseById(String id) {
+        return franchisePersistencePort.findById(id);
+    }
 }
