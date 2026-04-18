@@ -11,5 +11,5 @@ public class Branch {
 
     private String id;
     private String name;
-    private Long franchiseId;
+    private String franchiseId;
 }
