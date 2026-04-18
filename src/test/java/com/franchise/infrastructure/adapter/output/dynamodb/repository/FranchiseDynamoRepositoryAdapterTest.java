@@ -1,0 +1,61 @@
+package com.franchise.infrastructure.adapter.output.dynamodb.repository;
+
+import com.franchise.domain.model.Franchise;
+import com.franchise.infrastructure.adapter.output.dynamodb.entity.FranchiseEntity;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.test.StepVerifier;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
+import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+
+import java.util.concurrent.CompletableFuture;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class FranchiseDynamoRepositoryAdapterTest {
+
+    @InjectMocks
+    private FranchiseDynamoRepositoryAdapter adapter;
+
+    @Mock
+    private DynamoDbEnhancedAsyncClient client;
+
+    @Mock
+    private DynamoDbAsyncTable<FranchiseEntity> table;
+
+    @BeforeEach
+    void setUp() {
+        when(client.table(anyString(), ArgumentMatchers.<TableSchema<FranchiseEntity>>any()
+        )).thenReturn(table);
+
+        adapter.init();
+    }
+
+    @Test
+    void shouldSaveFranchiseSuccessfully() {
+        Franchise franchise = Franchise.builder()
+                .id("123")
+                .name("test franchise name")
+                .build();
+
+        when(table.putItem(any(FranchiseEntity.class)))
+                .thenReturn(CompletableFuture.completedFuture(null));
+
+        StepVerifier.create(adapter.save(franchise))
+                .assertNext(savedFranchise -> {
+                    assertEquals("FRANCHISE#123", savedFranchise.getId());
+                    assertEquals("test franchise name", savedFranchise.getName());
+                })
+                .verifyComplete();
+    }
+}
