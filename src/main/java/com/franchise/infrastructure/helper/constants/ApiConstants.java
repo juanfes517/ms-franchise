@@ -1,8 +1,9 @@
 package com.franchise.infrastructure.helper.constants;
 
-public class ApiContants {
+public class ApiConstants {
 
-    private ApiContants() {}
+    private ApiConstants() {}
 
     public static final String FRANCHISE_API_PATH = "/franchise";
+    public static final String BRANCH_API_PATH = "/branch";
 }
