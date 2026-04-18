@@ -1,6 +1,7 @@
 package com.franchise.domain.usecase;
 
 import com.franchise.domain.model.Branch;
+import com.franchise.domain.model.Franchise;
 import com.franchise.domain.spi.IBranchPersistencePort;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,6 +46,29 @@ class BranchUseCaseTest {
                     assertEquals("BRANCH#123", branch.getId());
                     assertEquals("test branch name", branchInput.getName());
                     assertEquals("FRANCHISE#123", branchInput.getFranchiseId());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldFindFranchiseSuccessfully() {
+
+        String id = "BRANCH#123";
+
+        Branch branchOutput = Branch.builder()
+                .id("BRANCH#123")
+                .franchiseId("FRANCHISE#123")
+                .name("test branch name")
+                .build();
+
+        when(branchPersistencePort.findById(any(String.class)))
+                .thenReturn(Mono.just(branchOutput));
+
+        StepVerifier.create(branchUseCase.findBranchById(id))
+                .assertNext(branch -> {
+                    assertEquals("BRANCH#123", branch.getId());
+                    assertEquals("FRANCHISE#123", branch.getFranchiseId());
+                    assertEquals("test branch name", branch.getName());
                 })
                 .verifyComplete();
     }
