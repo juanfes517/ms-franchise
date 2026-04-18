@@ -44,7 +44,6 @@ class BranchDynamoRepositoryAdapterTest {
     @Test
     void shouldSaveBranchSuccessfully() {
         Branch franchise = Branch.builder()
-                .id("123a")
                 .franchiseId("FRANCHISE#7eb")
                 .name("Test branch name")
                 .build();
@@ -54,7 +53,7 @@ class BranchDynamoRepositoryAdapterTest {
 
         StepVerifier.create(adapter.save(franchise))
                 .assertNext(savedBranch -> {
-                    assertEquals("FRANCHISE#123a", savedBranch.getId());
+                    assertTrue(savedBranch.getId().startsWith("BRANCH#"));
                     assertEquals("FRANCHISE#7eb", savedBranch.getFranchiseId());
                     assertEquals("Test branch name", savedBranch.getName());
                 })

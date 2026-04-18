@@ -5,5 +5,7 @@ public class DynamoAdapterConstants {
     private DynamoAdapterConstants() {}
 
     public static final String PREFIX_FRANCHISE = "FRANCHISE#";
+    public static final String PREFIX_BRANCH = "BRANCH#";
+    public static final String PREFIX_PRODUCT = "PRODUCT#";
     public static final String DYNAMODB_TABLE_NAME = "franchise-system";
 }

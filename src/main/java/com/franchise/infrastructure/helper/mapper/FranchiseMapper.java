@@ -4,14 +4,17 @@ import com.franchise.domain.model.Franchise;
 import com.franchise.infrastructure.adapter.output.dynamodb.entity.FranchiseEntity;
 import com.franchise.infrastructure.helper.constants.DynamoAdapterConstants;
 
+import java.util.UUID;
+
 public class FranchiseMapper {
 
     private FranchiseMapper() {}
 
     public static FranchiseEntity toFranchiseEntity(Franchise franchise) {
+        String randomId = UUID.randomUUID().toString();
         return FranchiseEntity.builder()
-                .partitionKey(DynamoAdapterConstants.PREFIX_FRANCHISE + franchise.getId())
-                .sortKey(DynamoAdapterConstants.PREFIX_FRANCHISE + franchise.getId())
+                .partitionKey(DynamoAdapterConstants.PREFIX_FRANCHISE + randomId)
+                .sortKey(DynamoAdapterConstants.PREFIX_FRANCHISE + randomId)
                 .name(franchise.getName())
                 .build();
     }
