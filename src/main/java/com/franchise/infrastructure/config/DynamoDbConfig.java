@@ -9,17 +9,27 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClientBuilder;
 
+import java.net.URI;
+
 @Configuration
 public class DynamoDbConfig {
 
     @Value("${aws.region}")
     private String region;
 
+    @Value("${aws.endpoint:#{null}}")
+    private String endpoint;
+
     @Bean
     public DynamoDbAsyncClient dynamoDbAsyncClient() {
         DynamoDbAsyncClientBuilder builder = DynamoDbAsyncClient.builder()
                 .region(Region.of(region))
                 .credentialsProvider(DefaultCredentialsProvider.create());
+
+        if (endpoint != null) {
+            builder.endpointOverride(URI.create(endpoint));
+        }
+
         return builder.build();
     }
 
