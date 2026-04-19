@@ -1,10 +1,12 @@
 package com.franchise.application.handler.impl;
 
+import com.franchise.application.dto.request.BranchRequestDTO;
 import com.franchise.application.dto.request.CreateBranchDTO;
 import com.franchise.application.dto.response.BranchWithMaxProductResponseDTO;
 import com.franchise.application.dto.response.BranchWithoutProductsDTO;
 import com.franchise.application.handler.IBranchHandler;
 import com.franchise.application.helper.constants.ExceptionConstants;
+import com.franchise.application.helper.exception.BranchNotFoundException;
 import com.franchise.application.helper.exception.FranchiseNotFoundException;
 import com.franchise.application.helper.mapper.BranchMapper;
 import com.franchise.domain.api.IBranchServicePort;
@@ -42,6 +44,15 @@ public class BranchHandler implements IBranchHandler {
                 .switchIfEmpty(Flux.error(new FranchiseNotFoundException(
                         franchiseId,
                         ExceptionConstants.BRANCH_WITHOUT_PRODUCTS_MESSAGE)))
+                .map(BranchMapper::toDTO);
+    }
+
+    @Override
+    public Mono<BranchWithoutProductsDTO> updateBranch(BranchRequestDTO branchRequestDTO) {
+        Branch branch = BranchMapper.toDomain(branchRequestDTO);
+        return branchServicePort
+                .updateBranch(branch)
+                .switchIfEmpty(Mono.error(new BranchNotFoundException(branch.getId())))
                 .map(BranchMapper::toDTO);
     }
 }

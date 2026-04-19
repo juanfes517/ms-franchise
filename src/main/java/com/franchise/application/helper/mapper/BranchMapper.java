@@ -1,5 +1,6 @@
 package com.franchise.application.helper.mapper;
 
+import com.franchise.application.dto.request.BranchRequestDTO;
 import com.franchise.application.dto.request.CreateBranchDTO;
 import com.franchise.application.dto.response.BranchWithMaxProductResponseDTO;
 import com.franchise.application.dto.response.BranchWithoutProductsDTO;
@@ -16,6 +17,14 @@ public class BranchMapper {
         return Branch.builder()
                 .name(createBranchDTO.getName())
                 .franchiseId(createBranchDTO.getFranchiseId())
+                .build();
+    }
+
+    public static Branch toDomain(BranchRequestDTO branchRequestDTO) {
+        return Branch.builder()
+                .id(branchRequestDTO.getId())
+                .name(branchRequestDTO.getName())
+                .franchiseId(branchRequestDTO.getFranchiseId())
                 .build();
     }
 

@@ -1,5 +1,6 @@
 package com.franchise.application.handler;
 
+import com.franchise.application.dto.request.BranchRequestDTO;
 import com.franchise.application.dto.request.CreateBranchDTO;
 import com.franchise.application.dto.response.BranchWithMaxProductResponseDTO;
 import com.franchise.application.dto.response.BranchWithoutProductsDTO;
@@ -10,4 +11,5 @@ public interface IBranchHandler {
 
     Mono<BranchWithoutProductsDTO> addBranchToFranchise(CreateBranchDTO createBranchDTO);
     Flux<BranchWithMaxProductResponseDTO> findMaxStockProductPerBranch(String franchiseId);
+    Mono<BranchWithoutProductsDTO> updateBranch(BranchRequestDTO branchRequestDTO);
 }

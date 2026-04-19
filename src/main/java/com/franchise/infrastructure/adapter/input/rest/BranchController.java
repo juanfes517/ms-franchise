@@ -1,5 +1,6 @@
 package com.franchise.infrastructure.adapter.input.rest;
 
+import com.franchise.application.dto.request.BranchRequestDTO;
 import com.franchise.application.dto.request.CreateBranchDTO;
 import com.franchise.application.dto.response.BranchWithMaxProductResponseDTO;
 import com.franchise.application.dto.response.BranchWithoutProductsDTO;
@@ -31,5 +32,13 @@ public class BranchController {
     @GetMapping(ApiConstants.MAX_STOCK_PER_BRANCH_PATH)
     public Flux<BranchWithMaxProductResponseDTO> findMaxStockProductPerBranch(@PathVariable String franchiseId) {
         return branchHandler.findMaxStockProductPerBranch(franchiseId);
+    }
+
+    @PatchMapping
+    public Mono<ResponseEntity<BranchWithoutProductsDTO>> updateBranch(
+            @Valid @RequestBody BranchRequestDTO branchRequestDTO) {
+        return branchHandler.updateBranch(branchRequestDTO)
+                .map(branch ->
+                        ResponseEntity.ok().body(branch));
     }
 }
