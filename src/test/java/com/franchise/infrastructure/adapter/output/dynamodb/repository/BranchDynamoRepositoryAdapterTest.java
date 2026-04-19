@@ -19,6 +19,8 @@ import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.PagePublisher;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedRequest;
+import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -152,6 +154,68 @@ class BranchDynamoRepositoryAdapterTest {
         String invalidFranchiseId = "INVALID#123";
 
         StepVerifier.create(adapter.findAllBranches(invalidFranchiseId))
+                .expectErrorMatches(error ->
+                        error instanceof IllegalArgumentException &&
+                        error.getMessage().equals(DynamoAdapterConstants.INVALID_FRANCHISE_ID)
+                )
+                .verify();
+
+        verifyNoInteractions(table);
+    }
+
+    @Test
+    void shouldUpdateBranchSuccessfully() {
+        Branch branch = Branch.builder()
+                .id("BRANCH#123")
+                .franchiseId("FRANCHISE#123")
+                .name("New Branch Name")
+                .build();
+
+        BranchEntity branchEntity = BranchEntity.builder()
+                .partitionKey("BRANCH#123")
+                .sortKey("FRANCHISE#123")
+                .name("New Branch Name")
+                .build();
+
+        when(table.updateItem(ArgumentMatchers.<UpdateItemEnhancedRequest<BranchEntity>>any()))
+                .thenReturn(CompletableFuture.completedFuture(branchEntity));
+
+        StepVerifier.create(adapter.update(branch))
+                .expectNextMatches(result ->
+                        result.getId().equals("BRANCH#123") &&
+                        result.getFranchiseId().equals("FRANCHISE#123") &&
+                        result.getName().equals("New Branch Name")
+                )
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturnErrorWhenBranchIdIsInvalid() {
+        Branch branch = Branch.builder()
+                .id("INVALID#123")
+                .franchiseId("FRANCHISE#123")
+                .name("New Branch Name")
+                .build();
+
+        StepVerifier.create(adapter.update(branch))
+                .expectErrorMatches(error ->
+                        error instanceof IllegalArgumentException &&
+                        error.getMessage().equals(DynamoAdapterConstants.INVALID_BRANCH_ID)
+                )
+                .verify();
+
+        verifyNoInteractions(table);
+    }
+
+    @Test
+    void shouldReturnErrorWhenFranchiseIdIsInvalidInUpdateFranchise() {
+        Branch branch = Branch.builder()
+                .id("BRANCH#123")
+                .franchiseId("INVALID#123")
+                .name("New Branch Name")
+                .build();
+
+        StepVerifier.create(adapter.update(branch))
                 .expectErrorMatches(error ->
                         error instanceof IllegalArgumentException &&
                         error.getMessage().equals(DynamoAdapterConstants.INVALID_FRANCHISE_ID)

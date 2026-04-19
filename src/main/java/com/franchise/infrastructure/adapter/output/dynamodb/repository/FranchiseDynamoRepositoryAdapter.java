@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 import software.amazon.awssdk.enhanced.dynamodb.*;
+import software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
 
 @Repository
@@ -52,14 +53,22 @@ public class FranchiseDynamoRepositoryAdapter implements IFranchisePersistencePo
             return Mono.error(new IllegalArgumentException(DynamoAdapterConstants.INVALID_FRANCHISE_ID));
         }
 
+        UpdateItemEnhancedRequest<FranchiseEntity> request = buildUpdateItemEnhancedRequest(franchise);
+        return Mono.fromFuture(() -> table.updateItem(request))
+                .map(FranchiseMapper::toDomain)
+                .onErrorResume(ConditionalCheckFailedException.class, ex -> Mono.empty());
+    }
+
+    private UpdateItemEnhancedRequest<FranchiseEntity> buildUpdateItemEnhancedRequest(Franchise franchise) {
         FranchiseEntity franchiseEntity = FranchiseMapper.toFranchiseEntity(franchise);
-        return Mono.fromFuture(table.putItem(r -> r
-                        .item(franchiseEntity)
-                        .conditionExpression(Expression.builder()
-                                .expression(DynamoAdapterConstants.ATTRIBUTE_EXISTS_PARTITION_KEY)
-                                .build())))
-                .onErrorResume(ConditionalCheckFailedException.class, ex -> Mono.empty())
-                .thenReturn(franchise);
+        return UpdateItemEnhancedRequest
+                .builder(FranchiseEntity.class)
+                .item(franchiseEntity)
+                .ignoreNulls(true)
+                .conditionExpression(Expression.builder()
+                        .expression(DynamoAdapterConstants.ATTRIBUTE_EXISTS_EXPRESSION)
+                        .build())
+                .build();
     }
 
 }

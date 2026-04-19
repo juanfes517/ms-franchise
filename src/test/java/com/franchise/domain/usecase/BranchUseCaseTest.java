@@ -92,10 +92,8 @@ class BranchUseCaseTest {
 
         when(branchPersistencePort.findAllBranches(franchiseId))
                 .thenReturn(Flux.just(branch1, branch2));
-
         when(productPersistencePort.getAllProductsByBranch(branch1.getId()))
                 .thenReturn(Flux.just(product1, product2));
-
         when(productPersistencePort.getAllProductsByBranch(branch2.getId()))
                 .thenReturn(Flux.just(product3, product4));
 
@@ -107,6 +105,25 @@ class BranchUseCaseTest {
                 .expectNextMatches(result ->
                         result.getId().equals("BRANCH#2") &&
                         result.getMaxStockProduct().getStock().equals(30)
+                )
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldUpdateBranchSuccessfully() {
+        Branch branch = Branch.builder()
+                .id("BRANCH#123")
+                .franchiseId("FRANCHISE#123")
+                .name("New Branch Name")
+                .build();
+
+        when(branchPersistencePort.update(any(Branch.class)))
+                .thenReturn(Mono.just(branch));
+
+        StepVerifier.create(branchUseCase.updateBranch(branch))
+                .expectNextMatches(result ->
+                        result.getId().equals("BRANCH#123") &&
+                        result.getName().equals("New Branch Name")
                 )
                 .verifyComplete();
     }

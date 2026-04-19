@@ -67,7 +67,7 @@ public class ProductDynamoRepositoryAdapter implements IProductPersistencePort {
 
         ScanEnhancedRequest request = ScanEnhancedRequest.builder()
                 .filterExpression(Expression.builder()
-                        .expression(DynamoAdapterConstants.DYNAMODB_EXPRESSION)
+                        .expression(DynamoAdapterConstants.DYNAMODB_BEGINS_EXPRESSION)
                         .putExpressionValue(
                                 DynamoAdapterConstants.PK_PREFIX_EXPRESSION_VALUE,
                                 AttributeValue.fromS(DynamoAdapterConstants.PREFIX_PRODUCT))

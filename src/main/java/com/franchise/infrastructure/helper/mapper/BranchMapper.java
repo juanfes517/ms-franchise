@@ -10,9 +10,17 @@ public class BranchMapper {
 
     private BranchMapper() {}
 
-    public static BranchEntity toBranchEntity(Branch branch) {
+    public static BranchEntity toNewBranchEntity(Branch branch) {
         return BranchEntity.builder()
                 .partitionKey(DynamoAdapterConstants.PREFIX_BRANCH + UUID.randomUUID())
+                .sortKey(branch.getFranchiseId())
+                .name(branch.getName())
+                .build();
+    }
+
+    public static BranchEntity toBranchEntity(Branch branch) {
+        return BranchEntity.builder()
+                .partitionKey(branch.getId())
                 .sortKey(branch.getFranchiseId())
                 .name(branch.getName())
                 .build();

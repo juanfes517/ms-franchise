@@ -9,4 +9,5 @@ public interface IBranchPersistencePort {
     Mono<Branch> save(Branch branch);
     Mono<Branch> findById(String id);
     Flux<Branch> findAllBranches(String franchiseId);
+    Mono<Branch> update(Branch branch);
 }

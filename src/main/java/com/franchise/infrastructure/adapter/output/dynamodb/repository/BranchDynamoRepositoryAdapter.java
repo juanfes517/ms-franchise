@@ -13,7 +13,9 @@ import reactor.core.publisher.Mono;
 import software.amazon.awssdk.enhanced.dynamodb.*;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
 
 @Repository
 @RequiredArgsConstructor
@@ -29,7 +31,7 @@ public class BranchDynamoRepositoryAdapter implements IBranchPersistencePort {
 
     @Override
     public Mono<Branch> save(Branch branch) {
-        BranchEntity branchEntity = BranchMapper.toBranchEntity(branch);
+        BranchEntity branchEntity = BranchMapper.toNewBranchEntity(branch);
         return Mono.fromFuture(table.putItem(branchEntity))
                 .thenReturn(BranchMapper.toDomain(branchEntity));
     }
@@ -58,7 +60,7 @@ public class BranchDynamoRepositoryAdapter implements IBranchPersistencePort {
 
         ScanEnhancedRequest request = ScanEnhancedRequest.builder()
                 .filterExpression(Expression.builder()
-                        .expression(DynamoAdapterConstants.DYNAMODB_EXPRESSION)
+                        .expression(DynamoAdapterConstants.DYNAMODB_BEGINS_EXPRESSION)
                         .putExpressionValue(
                                 DynamoAdapterConstants.PK_PREFIX_EXPRESSION_VALUE,
                                 AttributeValue.fromS(DynamoAdapterConstants.PREFIX_BRANCH))
@@ -70,5 +72,32 @@ public class BranchDynamoRepositoryAdapter implements IBranchPersistencePort {
 
         return Flux.from(table.scan(request).items())
                 .map(BranchMapper::toDomain);
+    }
+
+    @Override
+    public Mono<Branch> update(Branch branch) {
+        if (!branch.getId().startsWith(DynamoAdapterConstants.PREFIX_BRANCH)) {
+            return Mono.error(new IllegalArgumentException(DynamoAdapterConstants.INVALID_BRANCH_ID));
+        }
+        if (!branch.getFranchiseId().startsWith(DynamoAdapterConstants.PREFIX_FRANCHISE)) {
+            return Mono.error(new IllegalArgumentException(DynamoAdapterConstants.INVALID_FRANCHISE_ID));
+        }
+
+        UpdateItemEnhancedRequest<BranchEntity> request = buildUpdateItemEnhancedRequest(branch);
+        return Mono.fromFuture(() -> table.updateItem(request))
+                .map(BranchMapper::toDomain)
+                .onErrorResume(ConditionalCheckFailedException.class, ex -> Mono.empty());
+    }
+
+    private UpdateItemEnhancedRequest<BranchEntity> buildUpdateItemEnhancedRequest(Branch branch) {
+        BranchEntity branchEntity = BranchMapper.toBranchEntity(branch);
+        return UpdateItemEnhancedRequest
+                .builder(BranchEntity.class)
+                .item(branchEntity)
+                .ignoreNulls(true)
+                .conditionExpression(Expression.builder()
+                        .expression(DynamoAdapterConstants.ATTRIBUTE_EXISTS_EXPRESSION)
+                        .build())
+                .build();
     }
 }
