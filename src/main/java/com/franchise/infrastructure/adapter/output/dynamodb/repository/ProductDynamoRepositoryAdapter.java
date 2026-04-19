@@ -4,7 +4,6 @@ import com.franchise.domain.model.Product;
 import com.franchise.domain.spi.IProductPersistencePort;
 import com.franchise.infrastructure.adapter.output.dynamodb.entity.ProductEntity;
 import com.franchise.infrastructure.helper.constants.DynamoAdapterConstants;
-import com.franchise.infrastructure.helper.mapper.BranchMapper;
 import com.franchise.infrastructure.helper.mapper.ProductMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import software.amazon.awssdk.enhanced.dynamodb.*;
-import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
 import software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
@@ -69,9 +67,13 @@ public class ProductDynamoRepositoryAdapter implements IProductPersistencePort {
 
         ScanEnhancedRequest request = ScanEnhancedRequest.builder()
                 .filterExpression(Expression.builder()
-                        .expression("begins_with(partitionKey, :pkPrefix) AND sortKey = :sk")
-                        .putExpressionValue(":pkPrefix", AttributeValue.fromS(DynamoAdapterConstants.PREFIX_PRODUCT))
-                        .putExpressionValue(":sk", AttributeValue.fromS(branchId))
+                        .expression(DynamoAdapterConstants.DYNAMODB_EXPRESSION)
+                        .putExpressionValue(
+                                DynamoAdapterConstants.PK_PREFIX_EXPRESSION_VALUE,
+                                AttributeValue.fromS(DynamoAdapterConstants.PREFIX_PRODUCT))
+                        .putExpressionValue(
+                                DynamoAdapterConstants.SK_PREFIX_EXPRESSION_VALUE,
+                                AttributeValue.fromS(branchId))
                         .build())
                 .build();
 

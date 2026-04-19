@@ -1,7 +1,6 @@
 package com.franchise.infrastructure.adapter.output.dynamodb.repository;
 
 import com.franchise.domain.model.Branch;
-import com.franchise.domain.model.Franchise;
 import com.franchise.domain.spi.IBranchPersistencePort;
 import com.franchise.infrastructure.adapter.output.dynamodb.entity.BranchEntity;
 import com.franchise.infrastructure.helper.constants.DynamoAdapterConstants;
@@ -15,8 +14,6 @@ import software.amazon.awssdk.enhanced.dynamodb.*;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
-
-import static reactor.netty.http.HttpConnectionLiveness.log;
 
 @Repository
 @RequiredArgsConstructor
@@ -61,9 +58,13 @@ public class BranchDynamoRepositoryAdapter implements IBranchPersistencePort {
 
         ScanEnhancedRequest request = ScanEnhancedRequest.builder()
                 .filterExpression(Expression.builder()
-                        .expression("begins_with(partitionKey, :pkPrefix) AND sortKey = :sk")
-                        .putExpressionValue(":pkPrefix", AttributeValue.fromS(DynamoAdapterConstants.PREFIX_BRANCH))
-                        .putExpressionValue(":sk", AttributeValue.fromS(franchiseId))
+                        .expression(DynamoAdapterConstants.DYNAMODB_EXPRESSION)
+                        .putExpressionValue(
+                                DynamoAdapterConstants.PK_PREFIX_EXPRESSION_VALUE,
+                                AttributeValue.fromS(DynamoAdapterConstants.PREFIX_BRANCH))
+                        .putExpressionValue(
+                                DynamoAdapterConstants.SK_PREFIX_EXPRESSION_VALUE,
+                                AttributeValue.fromS(franchiseId))
                         .build())
                 .build();
 

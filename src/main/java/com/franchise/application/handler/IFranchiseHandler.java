@@ -1,10 +1,7 @@
 package com.franchise.application.handler;
 
 import com.franchise.application.dto.request.CreateFranchiseDTO;
-import com.franchise.application.dto.response.BranchWithMaxProductResponseDTO;
 import com.franchise.application.dto.response.FranchiseWithoutBranchDTO;
-import com.franchise.domain.model.BranchWithMaxProduct;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface IFranchiseHandler {
