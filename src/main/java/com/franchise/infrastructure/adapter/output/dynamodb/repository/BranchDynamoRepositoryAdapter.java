@@ -14,6 +14,7 @@ import software.amazon.awssdk.enhanced.dynamodb.*;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
 
 @Repository
 @RequiredArgsConstructor
@@ -29,7 +30,7 @@ public class BranchDynamoRepositoryAdapter implements IBranchPersistencePort {
 
     @Override
     public Mono<Branch> save(Branch branch) {
-        BranchEntity branchEntity = BranchMapper.toBranchEntity(branch);
+        BranchEntity branchEntity = BranchMapper.toNewBranchEntity(branch);
         return Mono.fromFuture(table.putItem(branchEntity))
                 .thenReturn(BranchMapper.toDomain(branchEntity));
     }
@@ -70,5 +71,24 @@ public class BranchDynamoRepositoryAdapter implements IBranchPersistencePort {
 
         return Flux.from(table.scan(request).items())
                 .map(BranchMapper::toDomain);
+    }
+
+    @Override
+    public Mono<Branch> update(Branch branch) {
+        if (!branch.getId().startsWith(DynamoAdapterConstants.PREFIX_BRANCH)) {
+            return Mono.error(new IllegalArgumentException(DynamoAdapterConstants.INVALID_BRANCH_ID));
+        }
+        if (!branch.getFranchiseId().startsWith(DynamoAdapterConstants.PREFIX_FRANCHISE)) {
+            return Mono.error(new IllegalArgumentException(DynamoAdapterConstants.INVALID_FRANCHISE_ID));
+        }
+
+        BranchEntity branchEntity = BranchMapper.toBranchEntity(branch);
+        return Mono.fromFuture(table.putItem(r -> r
+                        .item(branchEntity)
+                        .conditionExpression(Expression.builder()
+                                .expression(DynamoAdapterConstants.ATTRIBUTE_EXISTS_PARTITION_KEY)
+                                .build())))
+                .onErrorResume(ConditionalCheckFailedException.class, ex -> Mono.empty())
+                .thenReturn(branch);
     }
 }
