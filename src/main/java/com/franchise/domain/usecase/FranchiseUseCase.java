@@ -20,4 +20,9 @@ public class FranchiseUseCase implements IFranchiseServicePort {
     public Mono<Franchise> findFranchiseById(String id) {
         return franchisePersistencePort.findById(id);
     }
+
+    @Override
+    public Mono<Franchise> updateFranchise(Franchise franchise) {
+        return franchisePersistencePort.update(franchise);
+    }
 }
