@@ -17,6 +17,7 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedRequest;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -103,12 +104,20 @@ class FranchiseDynamoRepositoryAdapterTest {
                 .name("New Franchise Name")
                 .build();
 
-        when(table.putItem(ArgumentMatchers.<Consumer<PutItemEnhancedRequest.Builder<FranchiseEntity>>>any()))
-                .thenReturn(CompletableFuture.completedFuture(null));
+        FranchiseEntity franchiseEntity = FranchiseEntity.builder()
+                .partitionKey("FRANCHISE#123")
+                .sortKey("FRANCHISE#123")
+                .name("New Franchise Name")
+                .build();
+
+        when(table.updateItem(ArgumentMatchers.<UpdateItemEnhancedRequest<FranchiseEntity>>any()))
+                .thenReturn(CompletableFuture.completedFuture(franchiseEntity));
 
         StepVerifier.create(adapter.update(franchise))
-                .expectNextMatches(result -> result.getId().equals("FRANCHISE#123") &&
-                                             result.getName().equals("New Franchise Name"))
+                .expectNextMatches(result ->
+                        result.getId().equals("FRANCHISE#123") &&
+                        result.getName().equals("New Franchise Name")
+                )
                 .verifyComplete();
     }
 
