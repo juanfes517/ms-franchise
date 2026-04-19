@@ -29,6 +29,7 @@ public class BranchUseCase implements IBranchServicePort {
     public Flux<BranchWithMaxProduct> findMaxStockProductPerBranch(String franchiseId) {
         return branchPersistencePort
                 .findAllBranches(franchiseId)
+                .switchIfEmpty(Flux.empty())
                 .flatMap(branch ->
                         productPersistencePort
                                 .getAllProductsByBranch(branch.getId())

@@ -4,6 +4,7 @@ import com.franchise.application.dto.request.CreateBranchDTO;
 import com.franchise.application.dto.response.BranchWithMaxProductResponseDTO;
 import com.franchise.application.dto.response.BranchWithoutProductsDTO;
 import com.franchise.application.handler.IBranchHandler;
+import com.franchise.application.helper.constants.ExceptionConstants;
 import com.franchise.application.helper.exception.FranchiseNotFoundException;
 import com.franchise.application.helper.mapper.BranchMapper;
 import com.franchise.domain.api.IBranchServicePort;
@@ -38,6 +39,9 @@ public class BranchHandler implements IBranchHandler {
     public Flux<BranchWithMaxProductResponseDTO> findMaxStockProductPerBranch(String franchiseId) {
         return branchServicePort
                 .findMaxStockProductPerBranch(franchiseId)
+                .switchIfEmpty(Flux.error(new FranchiseNotFoundException(
+                        franchiseId,
+                        ExceptionConstants.BRANCH_WITHOUT_PRODUCTS_MESSAGE)))
                 .map(BranchMapper::toDTO);
     }
 }
