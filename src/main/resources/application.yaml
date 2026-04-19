@@ -9,3 +9,7 @@ server:
 
 aws:
   region: us-east-2
+  endpoint: ${AWS_DYNAMODB_ENDPOINT:#{null}}
+
+dynamodb:
+  table-name: franchise-system
