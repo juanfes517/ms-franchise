@@ -1,16 +1,14 @@
 package com.franchise.infrastructure.adapter.input.rest;
 
 import com.franchise.application.dto.request.CreateFranchiseDTO;
+import com.franchise.application.dto.request.FranchiseRequestDTO;
 import com.franchise.application.dto.response.FranchiseWithoutBranchDTO;
 import com.franchise.application.handler.IFranchiseHandler;
 import com.franchise.infrastructure.helper.constants.ApiConstants;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -27,5 +25,14 @@ public class FranchiseController {
                 .map(saved -> ResponseEntity
                         .ok()
                         .body(saved));
+    }
+
+    @PatchMapping
+    public Mono<ResponseEntity<FranchiseWithoutBranchDTO>> updateFranchise(
+            @Valid @RequestBody FranchiseRequestDTO franchiseRequestDTO) {
+        return franchiseHandler.updateFranchise(franchiseRequestDTO)
+                .map(updated -> ResponseEntity
+                        .ok()
+                        .body(updated));
     }
 }
