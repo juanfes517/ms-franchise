@@ -2,6 +2,7 @@ package com.franchise.infrastructure.adapter.output.dynamodb.repository;
 
 import com.franchise.domain.model.Branch;
 import com.franchise.infrastructure.adapter.output.dynamodb.entity.BranchEntity;
+import com.franchise.infrastructure.helper.constants.DynamoAdapterConstants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,12 +18,14 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.PagePublisher;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
+import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
 
 import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -100,5 +103,61 @@ class BranchDynamoRepositoryAdapterTest {
                         error instanceof IllegalArgumentException &&
                         error.getMessage().equals("Branch ID must start with 'BRANCH'"))
                 .verify();
+    }
+
+    @Test
+    void shouldFindAllBranchesSuccessfully() {
+        String franchiseId = "FRANCHISE#123";
+
+        BranchEntity branchEntity1 = BranchEntity.builder()
+                .partitionKey("BRANCH#1")
+                .sortKey(franchiseId)
+                .name("Branch 1")
+                .build();
+
+        BranchEntity branchEntity2 = BranchEntity.builder()
+                .partitionKey("BRANCH#2")
+                .sortKey(franchiseId)
+                .name("Branch 2")
+                .build();
+
+        when(pagePublisher.items())
+                .thenReturn(SdkPublisher.adapt(Flux.just(branchEntity1, branchEntity2)));
+
+        when(table.scan(any(ScanEnhancedRequest.class)))
+                .thenReturn(pagePublisher);
+
+        StepVerifier.create(adapter.findAllBranches(franchiseId))
+                .expectNextMatches(branch -> branch.getName().equals("Branch 1"))
+                .expectNextMatches(branch -> branch.getName().equals("Branch 2"))
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturnEmptyWhenNoBranchesFound() {
+        String franchiseId = "FRANCHISE#123";
+
+        when(pagePublisher.items())
+                .thenReturn(SdkPublisher.adapt(Flux.empty()));
+
+        when(table.scan(any(ScanEnhancedRequest.class)))
+                .thenReturn(pagePublisher);
+
+        StepVerifier.create(adapter.findAllBranches(franchiseId))
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturnErrorWhenFranchiseIdIsInvalid() {
+        String invalidFranchiseId = "INVALID#123";
+
+        StepVerifier.create(adapter.findAllBranches(invalidFranchiseId))
+                .expectErrorMatches(error ->
+                        error instanceof IllegalArgumentException &&
+                        error.getMessage().equals(DynamoAdapterConstants.INVALID_FRANCHISE_ID)
+                )
+                .verify();
+
+        verifyNoInteractions(table);
     }
 }

@@ -10,11 +10,15 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
+import software.amazon.awssdk.core.async.SdkPublisher;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.DeleteItemEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.PagePublisher;
+import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
 import software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedRequest;
 
 import java.util.concurrent.CompletableFuture;
@@ -37,6 +41,9 @@ class ProductDynamoRepositoryAdapterTest {
 
     @Mock
     private DynamoDbAsyncTable<ProductEntity> table;
+
+    @Mock
+    private PagePublisher<ProductEntity> pagePublisher;
 
     @BeforeEach
     void setUp() {
@@ -105,7 +112,7 @@ class ProductDynamoRepositoryAdapterTest {
     }
 
     @Test
-    void shouldReturnErrorWhenBranchIdIsInvalid() {
+    void shouldReturnErrorWhenBranchIdIsInvalidInDeleteProduct() {
         String invalidProductId = "PRODUCT#123";
         String branchId = "INVALID#123";
 
@@ -146,4 +153,62 @@ class ProductDynamoRepositoryAdapterTest {
                 })
                 .verifyComplete();
     }
+
+    @Test
+    void shouldGetAllProductsByBranchSuccessfully() {
+        String branchId = "BRANCH#123";
+
+        ProductEntity productEntity1 = ProductEntity.builder()
+                .partitionKey("PRODUCT#1")
+                .sortKey(branchId)
+                .name("Product 1")
+                .stock(10)
+                .build();
+
+        ProductEntity productEntity2 = ProductEntity.builder()
+                .partitionKey("PRODUCT#2")
+                .sortKey(branchId)
+                .name("Product 2")
+                .stock(20)
+                .build();
+
+        when(pagePublisher.items())
+                .thenReturn(SdkPublisher.adapt(Flux.just(productEntity1, productEntity2)));
+        when(table.scan(any(ScanEnhancedRequest.class)))
+                .thenReturn(pagePublisher);
+
+        StepVerifier.create(adapter.getAllProductsByBranch(branchId))
+                .expectNextMatches(product -> product.getName().equals("Product 1") && product.getStock().equals(10))
+                .expectNextMatches(product -> product.getName().equals("Product 2") && product.getStock().equals(20))
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturnEmptyWhenNoProductsFound() {
+        String branchId = "BRANCH#123";
+
+        when(pagePublisher.items())
+                .thenReturn(SdkPublisher.adapt(Flux.empty()));
+        when(table.scan(any(ScanEnhancedRequest.class)))
+                .thenReturn(pagePublisher);
+
+        StepVerifier.create(adapter.getAllProductsByBranch(branchId))
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturnErrorWhenBranchIdIsInvalid() {
+        String invalidBranchId = "INVALID#123";
+
+        StepVerifier.create(adapter.getAllProductsByBranch(invalidBranchId))
+                .expectErrorMatches(error ->
+                        error instanceof IllegalArgumentException &&
+                        error.getMessage().equals(DynamoAdapterConstants.INVALID_BRANCH_ID)
+                )
+                .verify();
+
+        verifyNoInteractions(table);
+    }
+
+
 }
