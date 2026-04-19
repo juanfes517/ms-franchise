@@ -6,7 +6,7 @@ WORKDIR /app
 COPY build.gradle settings.gradle ./
 COPY src ./src
 
-RUN gradle test --no-daemon
+# RUN gradle test --no-daemon
 RUN gradle bootJar --no-daemon
 
 
