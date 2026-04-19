@@ -16,6 +16,7 @@ Se usa **una única tabla** (`franchise-system`) para almacenar **franquicias**,
 
 Los ids llevan prefijos (`FRANCHISE#`, `BRANCH#`, `PRODUCT#`) para distinguir tipos de entidad en consultas y validaciones.
 
+
 ## Ejecución en local
 
 Swagger UI (misma URL en ambas opciones):
