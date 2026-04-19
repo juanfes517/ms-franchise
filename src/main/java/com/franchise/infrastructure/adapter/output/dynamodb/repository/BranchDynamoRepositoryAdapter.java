@@ -10,11 +10,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
-import software.amazon.awssdk.enhanced.dynamodb.Key;
-import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.*;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
+import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 @Repository
 @RequiredArgsConstructor
@@ -48,6 +47,28 @@ public class BranchDynamoRepositoryAdapter implements IBranchPersistencePort {
 
         return Flux.from(table.query(query).items())
                 .next()
+                .map(BranchMapper::toDomain);
+    }
+
+    @Override
+    public Flux<Branch> findAllBranches(String franchiseId) {
+        if (!franchiseId.startsWith(DynamoAdapterConstants.PREFIX_FRANCHISE)) {
+            return Flux.error(new IllegalArgumentException(DynamoAdapterConstants.INVALID_FRANCHISE_ID));
+        }
+
+        ScanEnhancedRequest request = ScanEnhancedRequest.builder()
+                .filterExpression(Expression.builder()
+                        .expression(DynamoAdapterConstants.DYNAMODB_EXPRESSION)
+                        .putExpressionValue(
+                                DynamoAdapterConstants.PK_PREFIX_EXPRESSION_VALUE,
+                                AttributeValue.fromS(DynamoAdapterConstants.PREFIX_BRANCH))
+                        .putExpressionValue(
+                                DynamoAdapterConstants.SK_PREFIX_EXPRESSION_VALUE,
+                                AttributeValue.fromS(franchiseId))
+                        .build())
+                .build();
+
+        return Flux.from(table.scan(request).items())
                 .map(BranchMapper::toDomain);
     }
 }

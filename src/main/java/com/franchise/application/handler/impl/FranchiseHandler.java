@@ -23,4 +23,5 @@ public class FranchiseHandler implements IFranchiseHandler {
                 .createFranchise(franchise)
                 .map(FranchiseMapper::toDTO);
     }
+
 }

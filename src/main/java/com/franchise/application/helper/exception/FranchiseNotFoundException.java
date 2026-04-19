@@ -15,4 +15,12 @@ public class FranchiseNotFoundException extends CustomException {
                 Map.of(ExceptionConstants.FRANCHISE_ID_STRING, franchiseId)
         );
     }
+
+    public FranchiseNotFoundException(String franchiseId, String message) {
+        super(
+                message,
+                ExceptionConstants.FRANCHISE_NOT_FOUND_CODE,
+                Map.of(ExceptionConstants.FRANCHISE_ID_STRING, franchiseId)
+        );
+    }
 }

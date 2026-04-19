@@ -8,12 +8,12 @@ import com.franchise.infrastructure.helper.mapper.ProductMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
-import software.amazon.awssdk.enhanced.dynamodb.Expression;
-import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.*;
+import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
 import software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedRequest;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
 
 @Repository
@@ -56,6 +56,28 @@ public class ProductDynamoRepositoryAdapter implements IProductPersistencePort {
                     return Mono.fromFuture(table.updateItem(request));
                 }))
                 .onErrorResume(ConditionalCheckFailedException.class, error -> Mono.empty())
+                .map(ProductMapper::toDomain);
+    }
+
+    @Override
+    public Flux<Product> getAllProductsByBranch(String branchId) {
+        if (!branchId.startsWith(DynamoAdapterConstants.PREFIX_BRANCH)) {
+            return Flux.error(new IllegalArgumentException(DynamoAdapterConstants.INVALID_BRANCH_ID));
+        }
+
+        ScanEnhancedRequest request = ScanEnhancedRequest.builder()
+                .filterExpression(Expression.builder()
+                        .expression(DynamoAdapterConstants.DYNAMODB_EXPRESSION)
+                        .putExpressionValue(
+                                DynamoAdapterConstants.PK_PREFIX_EXPRESSION_VALUE,
+                                AttributeValue.fromS(DynamoAdapterConstants.PREFIX_PRODUCT))
+                        .putExpressionValue(
+                                DynamoAdapterConstants.SK_PREFIX_EXPRESSION_VALUE,
+                                AttributeValue.fromS(branchId))
+                        .build())
+                .build();
+
+        return Flux.from(table.scan(request).items())
                 .map(ProductMapper::toDomain);
     }
 

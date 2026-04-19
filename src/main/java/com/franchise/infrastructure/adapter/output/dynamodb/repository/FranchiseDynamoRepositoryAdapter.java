@@ -47,4 +47,5 @@ public class FranchiseDynamoRepositoryAdapter implements IFranchisePersistencePo
         return Mono.fromFuture(table.getItem(key))
                 .map(FranchiseMapper::toDomain);
     }
+
 }
