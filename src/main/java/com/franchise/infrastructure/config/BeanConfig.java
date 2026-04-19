@@ -21,8 +21,10 @@ public class BeanConfig {
     }
 
     @Bean
-    public IBranchServicePort  branchServicePort(IBranchPersistencePort branchPersistencePort) {
-        return new BranchUseCase(branchPersistencePort);
+    public IBranchServicePort  branchServicePort(
+            IBranchPersistencePort branchPersistencePort,
+            IProductPersistencePort productPersistencePort) {
+        return new BranchUseCase(branchPersistencePort, productPersistencePort);
     }
 
     @Bean
