@@ -6,6 +6,16 @@ Microservicio de franquicias, sucursales y productos.
 
 El proyecto sigue una **arquitectura hexagonal (puertos y adaptadores)**: el **dominio** define casos de uso y contratos (puertos), la **capa de aplicación** orquesta flujos y expone DTOs, y la **infraestructura** implementa adaptadores de entrada (REST con Spring WebFlux) y de salida. La **persistencia está en Amazon DynamoDB**, accedida mediante el SDK de AWS y adaptadores en `infrastructure.adapter.output.dynamodb`.
 
+### Modelo de datos en DynamoDB (una sola tabla)
+
+Se usa **una única tabla** (`franchise-system`) para almacenar **franquicias**, **sucursales** y **productos** (patrón *single-table design*).
+
+- **Producto:** cada producto tiene un **identificador único** en `partitionKey` y se **vincula a su sucursal** mediante el `sortKey`, que guarda el id de la sucursal.
+- **Sucursal:** cada sucursal tiene un **identificador único** en `partitionKey` y se **vincula a su franquicia** mediante el `sortKey`, que guarda el id de la franquicia.
+- **Franquicia:** el registro de franquicia también usa `partitionKey` y `sortKey` con el **mismo id de franquicia** en ambos atributos, de modo que convive en la misma tabla con el resto de ítems.
+
+Los ids llevan prefijos (`FRANCHISE#`, `BRANCH#`, `PRODUCT#`) para distinguir tipos de entidad en consultas y validaciones.
+
 ## Ejecución en local
 
 Swagger UI (misma URL en ambas opciones):
