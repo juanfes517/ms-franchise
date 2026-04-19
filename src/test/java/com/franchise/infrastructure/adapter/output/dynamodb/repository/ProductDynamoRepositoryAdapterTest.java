@@ -15,6 +15,7 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.DeleteItemEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedRequest;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -116,5 +117,33 @@ class ProductDynamoRepositoryAdapterTest {
                 .verify();
 
         verifyNoInteractions(table);
+    }
+
+    @Test
+    void shouldUpdateProductSuccessfully() {
+
+        Product product = Product.builder()
+                .id("PRODUCT#123")
+                .branchId("BRANCH#123")
+                .name("Test product name")
+                .stock(50)
+                .build();
+
+        ProductEntity productEntity = ProductEntity.builder()
+                .partitionKey("PRODUCT#123")
+                .sortKey("BRANCH#123")
+                .name("Test product name")
+                .stock(50)
+                .build();
+
+        when(table.updateItem(ArgumentMatchers.<UpdateItemEnhancedRequest<ProductEntity>>any()))
+                .thenReturn(CompletableFuture.completedFuture(productEntity));
+
+        StepVerifier.create(adapter.updateProduct(product))
+                .assertNext(updatedProduct -> {
+                    assertEquals("Test product name", updatedProduct.getName());
+                    assertEquals(50, updatedProduct.getStock());
+                })
+                .verifyComplete();
     }
 }

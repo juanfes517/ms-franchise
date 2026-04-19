@@ -1,6 +1,7 @@
 package com.franchise.application.handler.impl;
 
 import com.franchise.application.dto.request.CreateProductDTO;
+import com.franchise.application.dto.request.ProductRequestDTO;
 import com.franchise.application.helper.exception.BranchNotFoundException;
 import com.franchise.application.helper.exception.ProductNotFoundException;
 import com.franchise.domain.api.IBranchServicePort;
@@ -112,11 +113,59 @@ class ProductHandlerTest {
         String productId = "PRODUCT#123";
         String branchId = "BRANCH#123";
 
-
         when(productServicePort.deleteProductFromBranch(any(String.class), any(String.class)))
                 .thenReturn(Mono.empty());
 
         StepVerifier.create(productHandler.deleteProductFromBranch(productId, branchId))
+                .expectErrorMatches(error ->
+                        error instanceof ProductNotFoundException &&
+                        error.getMessage().equals("Product not found")
+                )
+                .verify();
+    }
+
+    @Test
+    void shouldUpdateProductSuccessfully() {
+
+        ProductRequestDTO productInputDTO = ProductRequestDTO.builder()
+                .id("FRANCHISE#123")
+                .branchId("BRANCH#123")
+                .name("New product name")
+                .stock(6)
+                .build();
+
+        Product productOutput = Product.builder()
+                .id("PRODUCT#123")
+                .branchId("BRANCH#123")
+                .name("Product name")
+                .stock(3)
+                .build();
+
+        when(productServicePort.updateProduct(any(Product.class)))
+                .thenReturn(Mono.just(productOutput));
+
+        StepVerifier.create(productHandler.updateProduct(productInputDTO))
+                .assertNext(product -> {
+                    assertEquals(productOutput.getName(), product.getName());
+                    assertEquals(productOutput.getStock(), product.getStock());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturnErrorWhenProductNotFoundInUpdateProduct() {
+
+        ProductRequestDTO productInputDTO = ProductRequestDTO.builder()
+                .id("INVALID#123")
+                .branchId("INVALID#345")
+                .name("New product name")
+                .stock(6)
+                .build();
+
+        when(productServicePort.updateProduct(any(Product.class)))
+                .thenReturn(Mono.empty());
+
+        StepVerifier.create(productHandler.updateProduct(productInputDTO))
                 .expectErrorMatches(error ->
                         error instanceof ProductNotFoundException &&
                         error.getMessage().equals("Product not found")

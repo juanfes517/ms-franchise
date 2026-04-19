@@ -2,13 +2,18 @@ package com.franchise.domain.usecase;
 
 import com.franchise.domain.model.Product;
 import com.franchise.domain.spi.IProductPersistencePort;
+import com.franchise.infrastructure.adapter.output.dynamodb.entity.ProductEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedRequest;
+
+import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -72,6 +77,34 @@ class ProductUseCaseTest {
                 .assertNext(product -> {
                     assertEquals(productId, product.getId());
                     assertEquals(branchId, product.getBranchId());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldUpdateProductSuccessfully() {
+
+        Product product = Product.builder()
+                .id("PRODUCT#123")
+                .branchId("BRANCH#123")
+                .name("Product name")
+                .stock(50)
+                .build();
+
+        Product newProduct = Product.builder()
+                .id("PRODUCT#123")
+                .branchId("BRANCH#123")
+                .name("New product name")
+                .stock(42)
+                .build();
+
+        when(productPersistencePort.updateProduct(any(Product.class)))
+                .thenReturn(Mono.just(newProduct));
+
+        StepVerifier.create(productUseCase.updateProduct(product))
+                .assertNext(updatedProduct -> {
+                    assertEquals("New product name", updatedProduct.getName());
+                    assertEquals(42, updatedProduct.getStock());
                 })
                 .verifyComplete();
     }

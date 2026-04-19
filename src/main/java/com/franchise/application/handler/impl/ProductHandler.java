@@ -43,7 +43,8 @@ public class ProductHandler implements IProductHandler {
 
     @Override
     public Mono<ProductResponseDTO> updateProduct(ProductRequestDTO productRequestDTO) {
-        return productServicePort.updateProduct(ProductMapper.toDomain(productRequestDTO))
+        return productServicePort
+                .updateProduct(ProductMapper.toDomain(productRequestDTO))
                 .switchIfEmpty(Mono.error(
                         new ProductNotFoundException(productRequestDTO.getId(), productRequestDTO.getBranchId())))
                 .map(ProductMapper::toDTO);
