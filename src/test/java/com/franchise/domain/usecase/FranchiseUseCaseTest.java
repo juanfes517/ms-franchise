@@ -67,5 +67,28 @@ class FranchiseUseCaseTest {
                 .verifyComplete();
     }
 
+    @Test
+    void shouldUpdateProductSuccessfully() {
+
+        Franchise franchise = Franchise.builder()
+                .id("PRODUCT#123")
+                .name("Franchise name")
+                .build();
+
+        Franchise newFranchise = Franchise.builder()
+                .id("PRODUCT#123")
+                .name("New franchise name")
+                .build();
+
+        when(franchisePersistencePort.update(any(Franchise.class)))
+                .thenReturn(Mono.just(newFranchise));
+
+        StepVerifier.create(franchiseUseCase.updateFranchise(franchise))
+                .assertNext(updatedFranchise -> {
+                    assertEquals("PRODUCT#123", updatedFranchise.getId());
+                    assertEquals("New franchise name", updatedFranchise.getName());
+                })
+                .verifyComplete();
+    }
 
 }

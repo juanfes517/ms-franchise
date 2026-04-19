@@ -1,6 +1,9 @@
 package com.franchise.application.handler.impl;
 
 import com.franchise.application.dto.request.CreateFranchiseDTO;
+import com.franchise.application.dto.request.FranchiseRequestDTO;
+import com.franchise.application.helper.constants.ExceptionConstants;
+import com.franchise.application.helper.exception.FranchiseNotFoundException;
 import com.franchise.domain.api.IFranchiseServicePort;
 import com.franchise.domain.model.Franchise;
 import org.junit.jupiter.api.Test;
@@ -48,5 +51,45 @@ class FranchiseHandlerTest {
                 .verifyComplete();
     }
 
+    @Test
+    void shouldUpdateFranchiseSuccessfully() {
+        FranchiseRequestDTO requestDTO = FranchiseRequestDTO.builder()
+                .id("FRANCHISE#123")
+                .name("New Franchise Name")
+                .build();
+
+        Franchise franchise = Franchise.builder()
+                .id("FRANCHISE#123")
+                .name("New Franchise Name")
+                .build();
+
+        when(franchiseServicePort.updateFranchise(any(Franchise.class)))
+                .thenReturn(Mono.just(franchise));
+
+        StepVerifier.create(franchiseHandler.updateFranchise(requestDTO))
+                .expectNextMatches(dto ->
+                        dto.getId().equals("FRANCHISE#123") &&
+                        dto.getName().equals("New Franchise Name")
+                )
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturnErrorWhenFranchiseNotFound() {
+        FranchiseRequestDTO requestDTO = FranchiseRequestDTO.builder()
+                .id("FRANCHISE#123")
+                .name("New Franchise Name")
+                .build();
+
+        when(franchiseServicePort.updateFranchise(any(Franchise.class)))
+                .thenReturn(Mono.empty());
+
+        StepVerifier.create(franchiseHandler.updateFranchise(requestDTO))
+                .expectErrorMatches(error ->
+                        error instanceof FranchiseNotFoundException &&
+                        error.getMessage().contains(ExceptionConstants.FRANCHISE_NOT_FOUND_MESSAGE)
+                )
+                .verify();
+    }
 
 }
