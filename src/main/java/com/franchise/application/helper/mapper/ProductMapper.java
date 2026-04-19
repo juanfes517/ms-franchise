@@ -1,6 +1,7 @@
 package com.franchise.application.helper.mapper;
 
 import com.franchise.application.dto.request.CreateProductDTO;
+import com.franchise.application.dto.request.ProductRequestDTO;
 import com.franchise.application.dto.response.ProductResponseDTO;
 import com.franchise.domain.model.Product;
 
@@ -13,6 +14,15 @@ public class ProductMapper {
                 .name(createProductDTO.getName())
                 .stock(createProductDTO.getStock())
                 .branchId(createProductDTO.getBranchId())
+                .build();
+    }
+
+    public static Product toDomain(ProductRequestDTO productRequestDTO) {
+        return Product.builder()
+                .id(productRequestDTO.getId())
+                .name(productRequestDTO.getName())
+                .stock(productRequestDTO.getStock())
+                .branchId(productRequestDTO.getBranchId())
                 .build();
     }
 

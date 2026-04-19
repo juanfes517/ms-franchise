@@ -11,6 +11,6 @@ public class ProductResponseDTO {
 
     private String id;
     private String name;
-    private int stock;
+    private Integer stock;
     private String branchId;
 }

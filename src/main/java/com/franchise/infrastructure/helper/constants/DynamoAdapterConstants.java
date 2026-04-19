@@ -13,4 +13,5 @@ public class DynamoAdapterConstants {
     public static final String INVALID_BRANCH_ID = "Branch ID must start with 'BRANCH'";
     public static final String INVALID_PRODUCT_ID = "Product ID must start with 'PRODUCT'";
 
+    public static final String ATTRIBUTE_EXISTS_PARTITION_KEY = "attribute_exists(partitionKey)";
 }

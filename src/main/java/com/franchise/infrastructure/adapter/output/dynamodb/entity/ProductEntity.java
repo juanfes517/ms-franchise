@@ -16,7 +16,7 @@ public class ProductEntity {
     private String partitionKey;
     private String sortKey; // Branch id
     private String name;
-    private int stock;
+    private Integer stock;
 
     @DynamoDbPartitionKey
     public String getPartitionKey() {

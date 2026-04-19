@@ -1,6 +1,7 @@
 package com.franchise.application.handler.impl;
 
 import com.franchise.application.dto.request.CreateProductDTO;
+import com.franchise.application.dto.request.ProductRequestDTO;
 import com.franchise.application.dto.response.ProductResponseDTO;
 import com.franchise.application.handler.IProductHandler;
 import com.franchise.application.helper.exception.BranchNotFoundException;
@@ -38,5 +39,15 @@ public class ProductHandler implements IProductHandler {
                 .deleteProductFromBranch(productId, branchId)
                 .switchIfEmpty(Mono.error(new ProductNotFoundException(productId, branchId)))
                 .map(ProductMapper::toDTO);
+    }
+
+    @Override
+    public Mono<ProductResponseDTO> updateProduct(ProductRequestDTO productRequestDTO) {
+        return productServicePort
+                .updateProduct(ProductMapper.toDomain(productRequestDTO))
+                .switchIfEmpty(Mono.error(
+                        new ProductNotFoundException(productRequestDTO.getId(), productRequestDTO.getBranchId())))
+                .map(ProductMapper::toDTO);
+
     }
 }
