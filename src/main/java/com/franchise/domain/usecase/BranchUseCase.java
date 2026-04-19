@@ -42,4 +42,9 @@ public class BranchUseCase implements IBranchServicePort {
                                         .build())
                 );
     }
+
+    @Override
+    public Mono<Branch> updateBranch(Branch branch) {
+        return branchPersistencePort.update(branch);
+    }
 }

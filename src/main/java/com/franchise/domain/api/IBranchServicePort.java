@@ -10,4 +10,5 @@ public interface IBranchServicePort {
     Mono<Branch> addBranchToFranchise(Branch branch);
     Mono<Branch> findBranchById(String id);
     Flux<BranchWithMaxProduct> findMaxStockProductPerBranch(String franchiseId);
+    Mono<Branch> updateBranch(Branch branch);
 }
