@@ -1,7 +1,9 @@
 package com.franchise.application.handler.impl;
 
+import com.franchise.application.dto.request.BranchRequestDTO;
 import com.franchise.application.dto.request.CreateBranchDTO;
 import com.franchise.application.helper.constants.ExceptionConstants;
+import com.franchise.application.helper.exception.BranchNotFoundException;
 import com.franchise.application.helper.exception.FranchiseNotFoundException;
 import com.franchise.domain.api.IBranchServicePort;
 import com.franchise.domain.api.IFranchiseServicePort;
@@ -125,6 +127,50 @@ class BranchHandlerTest {
                 .expectErrorMatches(error ->
                         error instanceof FranchiseNotFoundException &&
                         error.getMessage().equals(ExceptionConstants.BRANCH_WITHOUT_PRODUCTS_MESSAGE)
+                )
+                .verify();
+    }
+
+    @Test
+    void shouldUpdateBranchSuccessfully() {
+        BranchRequestDTO requestDTO = BranchRequestDTO.builder()
+                .id("BRANCH#123")
+                .franchiseId("FRANCHISE#123")
+                .name("New Branch Name")
+                .build();
+
+        Branch branch = Branch.builder()
+                .id("BRANCH#123")
+                .franchiseId("FRANCHISE#123")
+                .name("New Branch Name")
+                .build();
+
+        when(branchServicePort.updateBranch(any(Branch.class)))
+                .thenReturn(Mono.just(branch));
+
+        StepVerifier.create(branchHandler.updateBranch(requestDTO))
+                .expectNextMatches(dto ->
+                        dto.getId().equals("BRANCH#123") &&
+                        dto.getName().equals("New Branch Name")
+                )
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturnErrorWhenBranchNotFound() {
+        BranchRequestDTO requestDTO = BranchRequestDTO.builder()
+                .id("BRANCH#123")
+                .franchiseId("FRANCHISE#123")
+                .name("New Branch Name")
+                .build();
+
+        when(branchServicePort.updateBranch(any(Branch.class)))
+                .thenReturn(Mono.empty());
+
+        StepVerifier.create(branchHandler.updateBranch(requestDTO))
+                .expectErrorMatches(error ->
+                        error instanceof BranchNotFoundException &&
+                        error.getMessage().contains(ExceptionConstants.BRANCH_NOT_FOUND_MESSAGE)
                 )
                 .verify();
     }
