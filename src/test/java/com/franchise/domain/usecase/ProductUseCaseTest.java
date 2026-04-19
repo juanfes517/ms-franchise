@@ -2,18 +2,13 @@ package com.franchise.domain.usecase;
 
 import com.franchise.domain.model.Product;
 import com.franchise.domain.spi.IProductPersistencePort;
-import com.franchise.infrastructure.adapter.output.dynamodb.entity.ProductEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedRequest;
-
-import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;

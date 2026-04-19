@@ -2,6 +2,7 @@ package com.franchise.infrastructure.adapter.output.dynamodb.repository;
 
 import com.franchise.domain.model.Franchise;
 import com.franchise.infrastructure.adapter.output.dynamodb.entity.FranchiseEntity;
+import com.franchise.infrastructure.helper.constants.DynamoAdapterConstants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,12 +16,15 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedRequest;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -90,5 +94,38 @@ class FranchiseDynamoRepositoryAdapterTest {
                         error instanceof IllegalArgumentException &&
                         error.getMessage().equals("Franchise ID must start with 'FRANCHISE'"))
                 .verify();
+    }
+
+    @Test
+    void shouldUpdateFranchiseSuccessfully() {
+        Franchise franchise = Franchise.builder()
+                .id("FRANCHISE#123")
+                .name("New Franchise Name")
+                .build();
+
+        when(table.putItem(ArgumentMatchers.<Consumer<PutItemEnhancedRequest.Builder<FranchiseEntity>>>any()))
+                .thenReturn(CompletableFuture.completedFuture(null));
+
+        StepVerifier.create(adapter.update(franchise))
+                .expectNextMatches(result -> result.getId().equals("FRANCHISE#123") &&
+                                             result.getName().equals("New Franchise Name"))
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturnErrorWhenFranchiseIdIsInvalid() {
+        Franchise franchise = Franchise.builder()
+                .id("INVALID#123")
+                .name("New Franchise Name")
+                .build();
+
+        StepVerifier.create(adapter.update(franchise))
+                .expectErrorMatches(error ->
+                        error instanceof IllegalArgumentException &&
+                        error.getMessage().equals(DynamoAdapterConstants.INVALID_FRANCHISE_ID)
+                )
+                .verify();
+
+        verifyNoInteractions(table);
     }
 }

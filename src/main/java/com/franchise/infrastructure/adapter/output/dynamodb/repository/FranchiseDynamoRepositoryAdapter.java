@@ -9,10 +9,8 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
-import software.amazon.awssdk.enhanced.dynamodb.Key;
-import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.*;
+import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
 
 @Repository
 @RequiredArgsConstructor
@@ -28,7 +26,7 @@ public class FranchiseDynamoRepositoryAdapter implements IFranchisePersistencePo
 
     @Override
     public Mono<Franchise> save(Franchise franchise) {
-        FranchiseEntity franchiseEntity = FranchiseMapper.toFranchiseEntity(franchise);
+        FranchiseEntity franchiseEntity = FranchiseMapper.toNewFranchiseEntity(franchise);
         return Mono.fromFuture(table.putItem(franchiseEntity))
                 .thenReturn(FranchiseMapper.toDomain(franchiseEntity));
     }
@@ -46,6 +44,22 @@ public class FranchiseDynamoRepositoryAdapter implements IFranchisePersistencePo
 
         return Mono.fromFuture(table.getItem(key))
                 .map(FranchiseMapper::toDomain);
+    }
+
+    @Override
+    public Mono<Franchise> update(Franchise franchise) {
+        if (!franchise.getId().startsWith(DynamoAdapterConstants.PREFIX_FRANCHISE)) {
+            return Mono.error(new IllegalArgumentException(DynamoAdapterConstants.INVALID_FRANCHISE_ID));
+        }
+
+        FranchiseEntity franchiseEntity = FranchiseMapper.toFranchiseEntity(franchise);
+        return Mono.fromFuture(table.putItem(r -> r
+                        .item(franchiseEntity)
+                        .conditionExpression(Expression.builder()
+                                .expression(DynamoAdapterConstants.ATTRIBUTE_EXISTS_PARTITION_KEY)
+                                .build())))
+                .onErrorResume(ConditionalCheckFailedException.class, ex -> Mono.empty())
+                .thenReturn(franchise);
     }
 
 }

@@ -10,11 +10,20 @@ public class FranchiseMapper {
 
     private FranchiseMapper() {}
 
-    public static FranchiseEntity toFranchiseEntity(Franchise franchise) {
+    public static FranchiseEntity toNewFranchiseEntity(Franchise franchise) {
         String randomId = UUID.randomUUID().toString();
         return FranchiseEntity.builder()
                 .partitionKey(DynamoAdapterConstants.PREFIX_FRANCHISE + randomId)
                 .sortKey(DynamoAdapterConstants.PREFIX_FRANCHISE + randomId)
+                .name(franchise.getName())
+                .build();
+    }
+
+    public static FranchiseEntity toFranchiseEntity(Franchise franchise) {
+        String randomId = UUID.randomUUID().toString();
+        return FranchiseEntity.builder()
+                .partitionKey(franchise.getId())
+                .sortKey(franchise.getId())
                 .name(franchise.getName())
                 .build();
     }
