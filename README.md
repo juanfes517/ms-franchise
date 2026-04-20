@@ -16,7 +16,6 @@ Se usa **una única tabla** (`franchise-system`) para almacenar **franquicias**,
 
 Los ids llevan prefijos (`FRANCHISE#`, `BRANCH#`, `PRODUCT#`) para distinguir tipos de entidad en consultas y validaciones.
 
-
 ## Ejecución en local
 
 Swagger UI (misma URL en ambas opciones):
@@ -66,3 +65,75 @@ Swagger UI (misma URL en ambas opciones):
 5. Abre la misma URL de Swagger: **http://localhost:8080/api/v1/swagger-ui/index.html**
 
 > **Nota:** En Linux o macOS, ajusta el volumen `-v` a la ruta de tu carpeta `.aws` local.
+
+## Endpoints de la app
+
+Base path de la API: **`/api/v1`**
+
+- **Health**
+   - `GET /api/v1/health`
+   - Recibe: sin parámetros.
+
+- **Franchise**
+   - `POST /api/v1/franchise`
+   - Recibe body:
+     ```json
+     {
+       "name": "string"
+     }
+     ```
+   - `PATCH /api/v1/franchise`
+   - Recibe body:
+     ```json
+     {
+       "id": "string",
+       "name": "string"
+     }
+     ```
+
+- **Branch**
+   - `POST /api/v1/branch`
+   - Recibe body:
+     ```json
+     {
+       "name": "string",
+       "franchiseId": "string"
+     }
+     ```
+   - `PATCH /api/v1/branch`
+   - Recibe body:
+     ```json
+     {
+       "id": "string",
+       "name": "string",
+       "franchiseId": "string"
+     }
+     ```
+   - `GET /api/v1/branch/franchises/{franchiseId}/branches/max-stock-products`
+   - Recibe path param:
+      - `franchiseId` (string)
+
+- **Product**
+   - `POST /api/v1/product`
+   - Recibe body:
+     ```json
+     {
+       "name": "string",
+       "stock": 0,
+       "branchId": "string"
+     }
+     ```
+   - `PATCH /api/v1/product`
+   - Recibe body:
+     ```json
+     {
+       "id": "string",
+       "branchId": "string",
+       "stock": 0,
+       "name": "string"
+     }
+     ```
+   - `DELETE /api/v1/product?productId={productId}&branchId={branchId}`
+   - Recibe query params:
+      - `productId` (string)
+      - `branchId` (string)
